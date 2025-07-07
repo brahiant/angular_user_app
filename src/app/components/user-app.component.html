@@ -1,30 +1,15 @@
-<h3>{{ title }}</h3>
+<div class="container my-4">
+    <h3>{{ title }}</h3>
+    <div class="row">
+        <div class="col">
+            <form>
+                <div class="form-group">
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <app-user [users]="users"></app-user>
+        </div>
+    </div>
+</div>
 
-@if(users.length === 0) {
-   <div class="alert alert-info">
-    No hay usuarios
-   </div>
-}@else {
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Username</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for(user of users; track user.id) {
-                <tr>
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.lastName }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.username }}</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
