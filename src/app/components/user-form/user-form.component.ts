@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { user } from '../../models/user';
 
 
@@ -18,9 +18,14 @@ export class UserFormComponent {
     this.user = new user();
   }
 
-  onSubmit(){
-    console.log(this.user);
-    this.newUserEventEmitter.emit(this.user);
+  onSubmit(userForm: NgForm):void{
+    if(userForm.valid){
+      this.newUserEventEmitter.emit(this.user);
+      userForm.reset();
+      userForm.resetForm();
+    }else{
+      console.log('Formulario no válido');
+    }
   }
 
 }
