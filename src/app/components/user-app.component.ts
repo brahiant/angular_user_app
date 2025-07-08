@@ -25,4 +25,8 @@ export class UserAppComponent implements OnInit{
    addUser(user: user){
     this.users = [...this.users, {...user}];
    }
+
+   removeUser(id: number){
+    this.users = this.users.filter(user => user.id !== id);
+   }
 }
