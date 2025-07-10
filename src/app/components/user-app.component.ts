@@ -9,15 +9,20 @@ import Swal from 'sweetalert2';
   selector: 'app-user-app',
   standalone: true,
   imports: [UserComponent, UserFormComponent],
-  templateUrl: './user-app.component.html'
+  templateUrl: './user-app.component.html',
+  styleUrls: ['./user-app.component.css']
 })
 export class UserAppComponent implements OnInit{
 
    title: string = 'Listado de usuarios';
    users: user[] = [];
    userSelected: user;
+   open: boolean;
+
+
    constructor(private userService: UserService) {
     this.userSelected = new user();
+    this.open = false;
    }
 
 
@@ -38,6 +43,7 @@ export class UserAppComponent implements OnInit{
       text: 'El usuario se ha agregado correctamente',
       icon: 'success'
     });
+    this.setOpen();
    }
 
    removeUser(id: number){
@@ -63,5 +69,10 @@ export class UserAppComponent implements OnInit{
 
    selectedUser(userRow: user){
     this.userSelected = {...userRow};
+    this.open = true;
+   }
+
+   setOpen(){
+    this.open = !this.open;
    }
 }

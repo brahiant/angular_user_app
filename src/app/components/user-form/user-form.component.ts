@@ -12,6 +12,7 @@ import { user } from '../../models/user';
 export class UserFormComponent {
   @Input() user: user;
 
+  @Output() openEventEmitter: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() newUserEventEmitter: EventEmitter<user> = new EventEmitter<user>();
 
   constructor(){
@@ -31,6 +32,10 @@ export class UserFormComponent {
   onClear(userForm: NgForm):void{
     userForm.reset();
     userForm.resetForm();
+  }
+
+  onOpenClose(){
+    this.openEventEmitter.emit();
   }
 
 }
