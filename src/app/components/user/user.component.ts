@@ -13,9 +13,13 @@ export class UserComponent {
 
   @Output() idUserEventEmitter: EventEmitter<number> = new EventEmitter<number>();
 
+  @Output() selectedUserEventEmitter: EventEmitter<user> = new EventEmitter<user>();
+
   onRemoveUser(id: number):void{
-    if(confirm('¿Estás seguro de querer eliminar este usuario?')){
       this.idUserEventEmitter.emit(id);
-    }
+  }
+
+  onSelectUser(user: user):void{
+    this.selectedUserEventEmitter.emit(user);
   }
 }

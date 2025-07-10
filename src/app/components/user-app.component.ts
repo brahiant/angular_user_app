@@ -3,6 +3,7 @@ import { user } from '../models/user';
 import { UserService } from '../services/user.service';
 import { UserComponent } from './user/user.component';
 import { UserFormComponent } from './user-form/user-form.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-user-app',
@@ -14,7 +15,11 @@ export class UserAppComponent implements OnInit{
 
    title: string = 'Listado de usuarios';
    users: user[] = [];
-   constructor(private userService: UserService) {}
+   userSelected: user;
+   constructor(private userService: UserService) {
+    this.userSelected = new user();
+   }
+
 
    ngOnInit(): void {
     this.userService.findAll().subscribe((users) => {
@@ -23,10 +28,40 @@ export class UserAppComponent implements OnInit{
    }
 
    addUser(user: user){
-    this.users = [...this.users, {...user}];
+    if(user.id > 0){
+      this.users = this.users.map(u => u.id === user.id ? {...user} : u);
+    }else{
+      this.users = [...this.users, {...user}];
+    }
+    Swal.fire({
+      title: 'Usuario agregado',
+      text: 'El usuario se ha agregado correctamente',
+      icon: 'success'
+    });
    }
 
    removeUser(id: number){
-    this.users = this.users.filter(user => user.id !== id);
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esto!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminar!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.users = this.users.filter(user => user.id !== id);
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success"
+        });
+      }
+    });
+   }
+
+   selectedUser(userRow: user){
+    this.userSelected = {...userRow};
    }
 }

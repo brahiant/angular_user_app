@@ -79,5 +79,6 @@
             }
         }
     </div>
-    <button type="submit" class="btn btn-primary my-2" [disabled]="userForm.invalid">Guardar</button>
+    <button type="submit" class="btn btn-primary m-2" [disabled]="userForm.invalid">{{ user.id > 0 ? 'Actualizar' : 'Guardar' }}</button>
+    <button type="button" class="btn btn-secondary m-2" (click)="onClear(userForm)">Limpiar</button>
 </form>
