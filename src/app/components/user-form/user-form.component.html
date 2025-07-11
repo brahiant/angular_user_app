@@ -1,11 +1,9 @@
-<div class="modal animacion fadeIn" tabindex="-1" style="display: block;">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ user.id > 0 ? 'Actualizar' : 'Agregar' }} Usuario</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="onOpenClose()"></button>
+<div class="card">
+      <div class="card-body">
+        <div class="card-header">
+          <h5 class="card-title">{{ user.id > 0 ? 'Actualizar' : 'Agregar' }} Usuario</h5>
         </div>
-        <div class="modal-body">
+        <div class="card-body">
             <form (ngSubmit)="onSubmit(userForm)" #userForm="ngForm">
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -92,9 +90,5 @@
             </form>
             
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="onOpenClose()">Cerrar</button>
-        </div>
       </div>
-    </div>
   </div>
