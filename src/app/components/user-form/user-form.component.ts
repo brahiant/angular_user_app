@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { user } from '../../models/user';
 import { SharingDataService } from '../../services/sharing-data.service';
-import { Router } from '@angular/router'; 
+import { ActivatedRoute } from '@angular/router'; 
 
 
 @Component({
@@ -11,17 +11,25 @@ import { Router } from '@angular/router';
   imports: [FormsModule],
   templateUrl: './user-form.component.html'
 })
-export class UserFormComponent {
+export class UserFormComponent implements OnInit {
   user: user;
 
-  constructor(private sharingDataService: SharingDataService, private route: Router){
+  constructor(private sharingDataService: SharingDataService, private route: ActivatedRoute, ){
     this.user = new user();
-    if(this.route.getCurrentNavigation()?.extras.state){
-      this.user = this.route.getCurrentNavigation()?.extras.state?.['user'] || new user();
-    }else{
-      this.user = new user();
-    }
 
+  }
+
+  ngOnInit(): void {
+    this.sharingDataService.selectedUserEventEmitter.subscribe((user) => {
+      this.user = user;
+    });
+
+   this.route.params.subscribe((params) => {
+    const userId: number = +(params['id'] || 0);
+    if(userId>0){
+      this.sharingDataService.findUserByIdEventEmitter.emit(userId);
+    }
+   });
   }
 
   onSubmit(userForm: NgForm):void{

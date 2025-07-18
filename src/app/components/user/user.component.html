@@ -29,7 +29,7 @@
                         </button>
                      </td>
                      <td>
-                        <button class="btn btn-primary btn-sm" (click)="onSelectUser(user)">
+                        <button class="btn btn-primary btn-sm" [routerLink]="['/users/edit', user.id]">
                             <i class="fa fa-edit">Actualizar</i>
                         </button>
                      </td>
