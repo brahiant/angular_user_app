@@ -32,6 +32,8 @@ export class UserAppComponent implements OnInit{
       this.userService.findAll().subscribe({
         next: (users) => {
           this.users = users;
+          // Notificar la lista inicial de usuarios
+          this.sharingDataService.usersUpdatedEventEmitter.emit(this.users);
         },
         error: (error) => {
           console.error('Error al cargar usuarios:', error);
@@ -51,17 +53,13 @@ export class UserAppComponent implements OnInit{
 
    findUserById(){
     this.sharingDataService.findUserByIdEventEmitter.subscribe((id) => {
-      console.log('UserAppComponent: Buscando usuario con ID:', id);
       const user = this.users.find(user => user.id === id);
       if(user){
-        console.log('UserAppComponent: Usuario encontrado:', user);
         this.sharingDataService.selectedUserEventEmitter.emit(user);
       } else {
-        console.log('UserAppComponent: Usuario no encontrado con ID:', id);
         // Si no se encuentra en el array local, intentar obtenerlo del backend
         this.userService.findById(id).subscribe({
           next: (userFromBackend) => {
-            console.log('UserAppComponent: Usuario obtenido del backend:', userFromBackend);
             this.sharingDataService.selectedUserEventEmitter.emit(userFromBackend);
           },
           error: (error) => {
@@ -74,17 +72,8 @@ export class UserAppComponent implements OnInit{
 
    addUser() {
     this.sharingDataService.newUserEventEmitter.subscribe((user) => {
-      console.log('UserAppComponent: Recibido usuario para procesar:', user);
-      
       // Validar que el usuario tenga datos válidos
       if (!user || !user.name || !user.lastname || !user.email || !user.username || !user.password) {
-        console.log('UserAppComponent: Usuario inválido, campos faltantes:', { 
-          name: !!user?.name, 
-          lastname: !!user?.lastname, 
-          email: !!user?.email, 
-          username: !!user?.username, 
-          password: !!user?.password 
-        });
         Swal.fire({
           title: 'Error',
           text: 'Por favor completa todos los campos requeridos',
@@ -94,12 +83,12 @@ export class UserAppComponent implements OnInit{
       }
       
       if (user.id && user.id > 0) {
-        console.log('UserAppComponent: Actualizando usuario existente con ID:', user.id);
         // Actualizar usuario existente
         this.userService.update(user).subscribe({
           next: (updatedUser) => {
-            console.log('UserAppComponent: Usuario actualizado exitosamente:', updatedUser);
             this.users = this.users.map(u => u.id === updatedUser.id ? updatedUser : u);
+            // Notificar el cambio en la lista de usuarios
+            this.sharingDataService.usersUpdatedEventEmitter.emit(this.users);
             Swal.fire({
               title: 'Usuario actualizado',
               text: 'El usuario se ha actualizado correctamente',
@@ -117,15 +106,15 @@ export class UserAppComponent implements OnInit{
           }
         });
       } else {
-        console.log('UserAppComponent: Creando nuevo usuario');
         // Crear nuevo usuario - eliminar el ID si existe para que el backend lo trate como nuevo
         const newUser = { ...user };
         delete newUser.id;
         
         this.userService.save(newUser).subscribe({
           next: (savedUser) => {
-            console.log('UserAppComponent: Usuario creado exitosamente:', savedUser);
             this.users = [...this.users, savedUser];
+            // Notificar el cambio en la lista de usuarios
+            this.sharingDataService.usersUpdatedEventEmitter.emit(this.users);
             Swal.fire({
               title: 'Usuario agregado',
               text: 'El usuario se ha agregado correctamente',
@@ -163,6 +152,8 @@ export class UserAppComponent implements OnInit{
           next: () => {
             // Solo eliminar del array local si la eliminación en el backend fue exitosa
             this.users = this.users.filter(user => user.id !== id);
+            // Notificar el cambio en la lista de usuarios
+            this.sharingDataService.usersUpdatedEventEmitter.emit(this.users);
             Swal.fire({
               title: "Eliminado!",
               text: "El usuario ha sido eliminado correctamente.",

@@ -17,8 +17,14 @@ export class UserComponent implements OnInit{
   users: user[] = [];
 
   ngOnInit(): void {
+    // Cargar usuarios iniciales
     this.service.findAll().subscribe((users) => {
       this.users = users;
+    });
+
+    // Suscribirse a cambios en la lista de usuarios
+    this.sharingDataService.usersUpdatedEventEmitter.subscribe((updatedUsers) => {
+      this.users = updatedUsers;
     });
   }
 
