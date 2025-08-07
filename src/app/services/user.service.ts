@@ -9,12 +9,28 @@ import { HttpClient } from '@angular/common/http';
 export class UserService {
 
   private users: user[] = [];
+  private url = 'http://localhost:8080/api/users';
   constructor(private http: HttpClient) { 
   }
 
   findAll(): Observable<user[]> {
-    return this.http.get('http://localhost:8080/api/users').pipe(
-      map((response: any) => response as user[])
-    );
+    return this.http.get<user[]>(this.url)
   }
-}
+
+  findById(id: number): Observable<user> {
+    return this.http.get<user>(`${this.url}/${id}`)
+  }
+
+  save(user: user): Observable<user> {
+    return this.http.post<user>(this.url, user)
+  }
+
+  update(user: user): Observable<user> {
+    return this.http.put<user>(this.url, user)
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${id}`)
+  }
+}   
+
