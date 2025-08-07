@@ -38,15 +38,15 @@
                     }
                 </div>
                 <div class="form-group">
-                    <label for="lastName">Apellido</label>
-                    <input type="text" placeholder="Apellido" class="form-control my-2" id="lastName" name="lastName" [(ngModel)]="user.lastName" required minlength="3" #lastName="ngModel">
-                    @if(lastName.invalid && (lastName.dirty || lastName.touched)) {
-                        @if(lastName.errors?.['required']) {
+                    <label for="lastname">Apellido</label>
+                    <input type="text" placeholder="Apellido" class="form-control my-2" id="lastname" name="lastname" [(ngModel)]="user.lastname" required minlength="3" #lastname="ngModel">
+                    @if(lastname.invalid && (lastname.dirty || lastname.touched)) {
+                        @if(lastname.errors?.['required']) {
                             <div class="alert alert-danger">
                                 <p>El apellido es requerido</p>
                             </div>
                         }
-                        @if(lastName.errors?.['minlength']) {
+                        @if(lastname.errors?.['minlength']) {
                             <div class="alert alert-danger">
                                 <p>El apellido debe tener al menos 3 caracteres</p>
                             </div>

@@ -50,7 +50,7 @@ export class UserAppComponent implements OnInit{
    addUser() {
     this.sharingDataService.newUserEventEmitter.subscribe((user) => {
       // Validar que el usuario tenga datos válidos
-      if (!user || !user.name || !user.lastName || !user.email) {
+      if (!user || !user.name || !user.lastname || !user.email) {
         // Puedes mostrar un error o simplemente no hacer nada
         return;
       }
