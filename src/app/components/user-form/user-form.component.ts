@@ -17,7 +17,8 @@ export class UserFormComponent implements OnInit {
 
   constructor(private sharingDataService: SharingDataService, private route: ActivatedRoute, private userService: UserService){
     this.user = new user();
-
+    // No inicializar el ID para nuevos usuarios
+    this.user.id = undefined;
   }
 
   ngOnInit(): void {
@@ -27,22 +28,32 @@ export class UserFormComponent implements OnInit {
 
    this.route.params.subscribe((params) => {
     const userId: number = +(params['id'] || 0);
-    if(userId>0){
+    if(userId > 0){
+      console.log('UserFormComponent: Editando usuario con ID:', userId);
       this.sharingDataService.findUserByIdEventEmitter.emit(userId);
       /*this.userService.findById(userId).subscribe((user) => {
         this.user = user;
       });*/
+    } else {
+      console.log('UserFormComponent: Creando nuevo usuario');
+      // Asegurar que el ID sea undefined para nuevos usuarios
+      this.user.id = undefined;
     }
    });
   }
 
   onSubmit(userForm: NgForm):void{
+    console.log('UserFormComponent: Formulario enviado, datos:', this.user);
+    console.log('UserFormComponent: Formulario válido:', userForm.valid);
+    
     if(userForm.valid){
+      console.log('UserFormComponent: Emitiendo usuario:', this.user);
       this.sharingDataService.newUserEventEmitter.emit(this.user);
       userForm.reset();
       userForm.resetForm();
     }else{
-      console.log('Formulario no válido');
+      console.log('UserFormComponent: Formulario no válido');
+      console.log('UserFormComponent: Errores del formulario:', userForm.errors);
     }
   }
 

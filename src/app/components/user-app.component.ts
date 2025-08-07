@@ -19,20 +19,31 @@ export class UserAppComponent implements OnInit{
    users: user[] = [];
 
    constructor(private sharingDataService: SharingDataService, private userService: UserService, private route: Router) {
+    // Solo cargar usuarios si no vienen del estado de navegación
     if(this.route.getCurrentNavigation()?.extras.state){
       this.users = this.route.getCurrentNavigation()?.extras.state?.['users'] || [];
-    }else{
-      this.userService.findAll().subscribe((users) => {
-        this.users = users;
-      });
     }
    }
 
 
    ngOnInit(): void {
-    this.userService.findAll().subscribe((users) => {
-      this.users = users;
-    });
+    // Solo cargar usuarios si no están ya cargados
+    if (this.users.length === 0) {
+      this.userService.findAll().subscribe({
+        next: (users) => {
+          this.users = users;
+        },
+        error: (error) => {
+          console.error('Error al cargar usuarios:', error);
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudieron cargar los usuarios',
+            icon: 'error'
+          });
+        }
+      });
+    }
+    
     this.addUser();
     this.removeUser();
     this.findUserById();
@@ -40,33 +51,98 @@ export class UserAppComponent implements OnInit{
 
    findUserById(){
     this.sharingDataService.findUserByIdEventEmitter.subscribe((id) => {
+      console.log('UserAppComponent: Buscando usuario con ID:', id);
       const user = this.users.find(user => user.id === id);
       if(user){
+        console.log('UserAppComponent: Usuario encontrado:', user);
         this.sharingDataService.selectedUserEventEmitter.emit(user);
+      } else {
+        console.log('UserAppComponent: Usuario no encontrado con ID:', id);
+        // Si no se encuentra en el array local, intentar obtenerlo del backend
+        this.userService.findById(id).subscribe({
+          next: (userFromBackend) => {
+            console.log('UserAppComponent: Usuario obtenido del backend:', userFromBackend);
+            this.sharingDataService.selectedUserEventEmitter.emit(userFromBackend);
+          },
+          error: (error) => {
+            console.error('UserAppComponent: Error al obtener usuario del backend:', error);
+          }
+        });
       }
     });
    }
 
    addUser() {
     this.sharingDataService.newUserEventEmitter.subscribe((user) => {
+      console.log('UserAppComponent: Recibido usuario para procesar:', user);
+      
       // Validar que el usuario tenga datos válidos
-      if (!user || !user.name || !user.lastname || !user.email) {
-        // Puedes mostrar un error o simplemente no hacer nada
+      if (!user || !user.name || !user.lastname || !user.email || !user.username || !user.password) {
+        console.log('UserAppComponent: Usuario inválido, campos faltantes:', { 
+          name: !!user?.name, 
+          lastname: !!user?.lastname, 
+          email: !!user?.email, 
+          username: !!user?.username, 
+          password: !!user?.password 
+        });
+        Swal.fire({
+          title: 'Error',
+          text: 'Por favor completa todos los campos requeridos',
+          icon: 'error'
+        });
         return;
       }
-      if (user.id > 0) {
-        this.users = this.users.map(u => u.id === user.id ? { ...user } : u);
+      
+      if (user.id && user.id > 0) {
+        console.log('UserAppComponent: Actualizando usuario existente con ID:', user.id);
+        // Actualizar usuario existente
+        this.userService.update(user).subscribe({
+          next: (updatedUser) => {
+            console.log('UserAppComponent: Usuario actualizado exitosamente:', updatedUser);
+            this.users = this.users.map(u => u.id === updatedUser.id ? updatedUser : u);
+            Swal.fire({
+              title: 'Usuario actualizado',
+              text: 'El usuario se ha actualizado correctamente',
+              icon: 'success'
+            });
+            this.route.navigate(['/users']);
+          },
+          error: (error) => {
+            console.error('UserAppComponent: Error al actualizar usuario:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo actualizar el usuario',
+              icon: 'error'
+            });
+          }
+        });
       } else {
-        // Evitar agregar usuarios con id inválido
-        const newId = this.users.length > 0 ? Math.max(...this.users.map(u => u.id)) + 1 : 1;
-        this.users = [...this.users, { ...user, id: newId }];
+        console.log('UserAppComponent: Creando nuevo usuario');
+        // Crear nuevo usuario - eliminar el ID si existe para que el backend lo trate como nuevo
+        const newUser = { ...user };
+        delete newUser.id;
+        
+        this.userService.save(newUser).subscribe({
+          next: (savedUser) => {
+            console.log('UserAppComponent: Usuario creado exitosamente:', savedUser);
+            this.users = [...this.users, savedUser];
+            Swal.fire({
+              title: 'Usuario agregado',
+              text: 'El usuario se ha agregado correctamente',
+              icon: 'success'
+            });
+            this.route.navigate(['/users']);
+          },
+          error: (error) => {
+            console.error('UserAppComponent: Error al crear usuario:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo crear el usuario',
+              icon: 'error'
+            });
+          }
+        });
       }
-      this.route.navigate(['/users'], { state: { users: this.users } });
-      Swal.fire({
-        title: 'Usuario agregado',
-        text: 'El usuario se ha agregado correctamente',
-        icon: 'success'
-      });
     });
   }
 
@@ -82,14 +158,25 @@ export class UserAppComponent implements OnInit{
       confirmButtonText: "Si, eliminar!"
     }).then((result) => {
       if (result.isConfirmed) {
-        this.users = this.users.filter(user => user.id !== id);
-        this.route.navigate(['/users/create'], {skipLocationChange: true}).then(() => {
-          this.route.navigate(['/users'], {state: {users: this.users}});
-        });
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          icon: "success"
+        // Llamar al servicio para eliminar del backend
+        this.userService.delete(id).subscribe({
+          next: () => {
+            // Solo eliminar del array local si la eliminación en el backend fue exitosa
+            this.users = this.users.filter(user => user.id !== id);
+            Swal.fire({
+              title: "Eliminado!",
+              text: "El usuario ha sido eliminado correctamente.",
+              icon: "success"
+            });
+          },
+          error: (error) => {
+            console.error('Error al eliminar usuario:', error);
+            Swal.fire({
+              title: "Error",
+              text: "No se pudo eliminar el usuario",
+              icon: "error"
+            });
+          }
         });
       }
     });
