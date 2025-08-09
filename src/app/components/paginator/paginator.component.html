@@ -1,0 +1,16 @@
+@if(paginator.totalPages > 1){
+<ul class="pagination">
+    <li class="page-item">
+        <a class="page-link" [routerLink]="[url, 0]">First</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" [routerLink]="[url, paginator.number - 1]">Previous</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" [routerLink]="[url, paginator.number + 1]">Next</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" [routerLink]="[url, paginator.totalPages - 1]">Last</a>
+    </li>
+</ul>
+}

@@ -6,6 +6,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import Swal from 'sweetalert2';
 import { SharingDataService } from '../services/sharing-data.service';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-user-app',
@@ -17,8 +18,9 @@ import { Router } from '@angular/router';
 export class UserAppComponent implements OnInit{
 
    users: user[] = [];
+   paginator: any = [];
 
-   constructor(private sharingDataService: SharingDataService, private userService: UserService, private route: Router) {
+   constructor(private sharingDataService: SharingDataService, private userService: UserService, private route: Router, private activatedRoute: ActivatedRoute) {
     // Solo cargar usuarios si no vienen del estado de navegación
     if(this.route.getCurrentNavigation()?.extras.state){
       this.users = this.route.getCurrentNavigation()?.extras.state?.['users'] || [];
@@ -28,7 +30,7 @@ export class UserAppComponent implements OnInit{
 
    ngOnInit(): void {
     // Solo cargar usuarios si no están ya cargados
-    if (this.users.length === 0) {
+    /*if (this.users.length === 0) {
       this.userService.findAll().subscribe({
         next: (users) => {
           this.users = users;
@@ -44,11 +46,26 @@ export class UserAppComponent implements OnInit{
           });
         }
       });
-    }
+    }*/
+    this.activatedRoute.paramMap.subscribe((params) => {
+      const page = +(params.get('page') || '0');
+      this.userService.findAllPage(page).subscribe((pageable) => {
+        this.users = pageable.content as user[];
+        this.sharingDataService.usersUpdatedEventEmitter.emit(this.users);
+      });
+    });
     
     this.addUser();
     this.removeUser();
     this.findUserById();
+    this.pageUsersEvent();
+   }
+
+   pageUsersEvent(){
+    this.sharingDataService.pageableEventEmitter.subscribe((pageable) => {
+      this.users = pageable.users;
+      this.paginator = pageable.paginator;
+    });
    }
 
    findUserById(){
@@ -94,7 +111,12 @@ export class UserAppComponent implements OnInit{
               text: 'El usuario se ha actualizado correctamente',
               icon: 'success'
             });
-            this.route.navigate(['/users']);
+            this.route.navigate(['/users'], {
+              state: {
+                users: this.users,
+                paginator: this.paginator
+              }
+            });
           },
           error: (error) => {
             console.error('UserAppComponent: Error al actualizar usuario:', error);
@@ -120,7 +142,12 @@ export class UserAppComponent implements OnInit{
               text: 'El usuario se ha agregado correctamente',
               icon: 'success'
             });
-            this.route.navigate(['/users']);
+            this.route.navigate(['/users'], {
+              state: {
+                users: this.users,
+                paginator: this.paginator
+              }
+            });
           },
           error: (error) => {
             console.error('UserAppComponent: Error al crear usuario:', error);
@@ -158,6 +185,12 @@ export class UserAppComponent implements OnInit{
               title: "Eliminado!",
               text: "El usuario ha sido eliminado correctamente.",
               icon: "success"
+            });
+            this.route.navigate(['/users'], {
+              state: {
+                users: this.users,
+                paginator: this.paginator
+              }
             });
           },
           error: (error) => {

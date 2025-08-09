@@ -19,6 +19,12 @@ export class UserService {
     );
   }
 
+  findAllPage(page: number): Observable<any> {
+    return this.http.get<any>(`${this.url}/page/${page}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   findById(id: number): Observable<user> {
     return this.http.get<user>(`${this.url}/${id}`).pipe(
       catchError(this.handleError)

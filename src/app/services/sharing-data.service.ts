@@ -16,7 +16,8 @@ export class SharingDataService {
   private _selectedUserEventEmitter: EventEmitter<user> = new EventEmitter<user>();
 
   private _usersUpdatedEventEmitter: EventEmitter<user[]> = new EventEmitter<user[]>();
-  
+
+  private _pageableEventEmitter: EventEmitter<any> = new EventEmitter<any>();
 
   constructor() {}
 
@@ -38,6 +39,10 @@ export class SharingDataService {
 
   get usersUpdatedEventEmitter(): EventEmitter<user[]> {
     return this._usersUpdatedEventEmitter;
+  }
+
+  get pageableEventEmitter(): EventEmitter<any> {
+    return this._pageableEventEmitter;
   }
 
 }
